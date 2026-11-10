@@ -3,8 +3,8 @@
 通过 SPlayer-Next 插件采集歌词与播放状态，经本地后端传递给网页，作为 OBS 等直播软件的浏览器源叠加到直播画面中。
 网页提供可切换的歌词展示方式，AMLL（Apple Music-like Lyrics）是其中一种可选渲染器。
 
-首版在同一台电脑运行 SPlayer、后端与 OBS。当前整理需求和技术方案，已完成后端控制 SPlayer 搜索并播放首个结果的独立验证。
-长期功能包含弹幕「点歌 xxx」及未来更多指令。B 站弹幕到后端已有资料层面的可行方案，优先研究账号鉴权与发送者信息，尚未实施或连接验证。
+首版在同一台电脑运行 SPlayer、后端与 OBS。正式应用仍在准备，已完成后端控制 SPlayer 搜索并播放首个结果的独立验证。
+长期功能包含弹幕「点歌 xxx」及未来更多指令。B 站登录与收弹幕的独立示例已实现，等待用户进行真实平台验收。
 
 ## 从这里开始
 
@@ -15,17 +15,17 @@
 
 完整入口见 [项目文档索引](docs/README.md)。
 点歌验证的运行方式见 [验证程序](experiments/song-request/README.md)，实测结果见 [点歌与后端控制](docs/song-requests.md)。
-B 站直播间到后端的候选接入方式见 [弹幕接入可行性方案](docs/bilibili-ingress.md)，当前只提出方案。
-账号接入建议“二维码登录为主、手动导入 Cookie 为备选”，详见 [鉴权与用户信息方案](docs/bilibili-auth.md)；尚未实际登录。
+B 站直播间到后端的接入依据见 [弹幕接入可行性方案](docs/bilibili-ingress.md)和 [鉴权与用户信息方案](docs/bilibili-auth.md)。
+人工验收入口见 [B 站登录与弹幕示例](experiments/bilibili-live/README.md)，默认地址为 `http://127.0.0.1:19631`，支持二维码登录、Cookie 导入、账号检查与直播间连接。
 
 ## 当前状态
 
 - Git 仓库已建立，默认分支为 `main`。
 - 产品方向、OBS 浏览器源、同机部署及多种展示方式已确认。
-- 正式歌词应用工程尚未建立；`experiments/song-request/` 为不依赖第三方包的点歌验证代码。
+- 正式歌词应用工程尚未建立；`experiments/song-request/` 为点歌验证代码，`experiments/bilibili-live/` 为独立登录及收弹幕示例。
 - `SPlayer-docs/docs/` 保留原始宿主文档；其中 `.vitepress/` 是参考站点配置。
 - AMLL 克隆位于同级目录 `../applemusic-like-lyrics/`，作为只读参考，不包含在本仓库内。
-- B 站接口资料位于同级目录 `../bilibili-api-collect/`，仅阅读文档，未进行直播间连接测试。
+- B 站接口资料位于同级目录 `../bilibili-api-collect/`，保持只读；登录与收弹幕示例已通过本地模拟测试，真实结果待用户验收。
 
 ## 协作约定
 

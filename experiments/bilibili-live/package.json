@@ -1,0 +1,19 @@
+{
+  "name": "splayer-bilibili-live-demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "B 站二维码登录与直播弹幕最小验证程序",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test *.test.mjs"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4",
+    "tough-cookie": "^6.1.0",
+    "ws": "^8.22.2"
+  }
+}

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="demo-token" content="__MANAGEMENT_TOKEN__">
+  <title>B 站登录与弹幕验收 · SPlayer Live</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">SPLAYER LIVE · 本地验证</p>
+      <h1>B 站登录与弹幕验收</h1>
+      <p>依次确认账号登录、直播认证和弹幕身份。此示例只接收弹幕，不执行点歌。</p>
+      <span id="backend" class="badge" role="status">连接本地后端中</span>
+    </header>
+    <div id="error" class="error" role="alert" hidden></div>
+    <div class="grid">
+      <section aria-labelledby="loginTitle">
+        <div class="section-title"><h2 id="loginTitle">01 · 账号登录</h2><span id="accountBadge" class="badge">未登录</span></div>
+        <p id="accountName">尚未登录接收账号</p>
+        <p id="loginMessage" class="muted" aria-live="polite"></p>
+        <div class="actions">
+          <button id="qrButton" type="button">二维码登录</button>
+          <button id="checkButton" class="secondary" type="button" disabled>检查登录状态</button>
+          <button id="logoutButton" class="secondary" type="button" disabled>移除本地登录态</button>
+        </div>
+        <div id="qrArea" class="qr-area" hidden>
+          <img id="qrImage" width="256" height="256" alt="使用哔哩哔哩手机客户端扫码登录">
+          <p id="qrCountdown"></p>
+          <button id="cancelButton" class="secondary" type="button">取消本次登录</button>
+        </div>
+        <details>
+          <summary>备用方式：手动导入 Cookie</summary>
+          <form id="cookieForm">
+            <label for="cookie">B 站 Cookie（只在内存使用）</label>
+            <textarea id="cookie" rows="3" spellcheck="false" autocomplete="off" placeholder="SESSDATA=…; bili_jct=…"></textarea>
+            <button id="cookieButton" class="secondary" type="submit">导入并校验</button>
+          </form>
+        </details>
+        <p class="note">关闭程序后登录态消失。移除本地登录态不会主动退出浏览器中的 B 站账号。</p>
+      </section>
+      <section aria-labelledby="roomTitle">
+        <div class="section-title"><h2 id="roomTitle">02 · 连接直播间</h2><span id="roomBadge" class="badge">未连接</span></div>
+        <form id="roomForm">
+          <label for="roomId">直播间号（支持短号）</label>
+          <input id="roomId" name="roomId" inputmode="numeric" pattern="[1-9][0-9]*" maxlength="16" placeholder="输入直播间号，如 123456" required>
+          <div class="actions">
+            <button id="connectButton" type="submit" disabled>连接直播间</button>
+            <button id="disconnectButton" class="secondary" type="button" disabled>断开连接</button>
+          </div>
+        </form>
+        <p id="roomMessage" class="muted" aria-live="polite"></p>
+        <dl id="roomInfo"></dl>
+        <p class="note">认证成功后，使用 B 站网页或客户端向该直播间发送“歌词验收”。可用另一个账号发送，核对发送者 UID 与接收账号的区别。</p>
+      </section>
+    </div>
+    <section aria-labelledby="messagesTitle">
+      <div class="section-title"><h2 id="messagesTitle">03 · 弹幕记录</h2><button id="exportButton" class="secondary" type="button">导出验收记录</button></div>
+      <p id="stats" class="muted">等待直播间连接。最多显示最近 100 条弹幕。</p>
+      <p class="note">“身份可识别”表示消息提供了 UID；昵称仍可能脱敏。身份受限或缺失会单独标记。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>接收时间</th><th>发送者</th><th>发送者 UID</th><th>身份</th><th>弹幕内容</th></tr></thead>
+          <tbody id="messages"></tbody>
+        </table>
+      </div>
+      <p id="empty" class="empty">暂无弹幕。连接成功后发送一条消息进行验收。</p>
+    </section>
+    <section aria-labelledby="logsTitle">
+      <h2 id="logsTitle">阶段记录</h2>
+      <ul id="logs" class="logs"></ul>
+    </section>
+  </main>
+</body>
+</html>
