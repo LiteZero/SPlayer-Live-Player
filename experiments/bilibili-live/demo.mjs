@@ -4,6 +4,8 @@ import WebSocket from "ws";
 import { BilibiliApi, BiliError, userAgent } from "./bilibili.mjs";
 import { packet, decodePackets, normalizeDanmu } from "./protocol.mjs";
 
+const qrHosts = new Set(["passport.bilibili.com", "account.bilibili.com"]);
+
 export class LiveDemo extends EventEmitter {
   constructor({ api = new BilibiliApi(), WebSocketImpl = WebSocket, pollMs = 2000, qrLifetimeMs = 180_000 } = {}) {
     super();
@@ -54,7 +56,9 @@ export class LiveDemo extends EventEmitter {
       if (generation !== this.loginGeneration) return;
       if (typeof data?.qrcode_key !== "string" || typeof data.url !== "string") throw new Error("二维码响应格式异常");
       const scanUrl = new URL(data.url);
-      if (scanUrl.protocol !== "https:" || scanUrl.hostname !== "passport.bilibili.com") throw new Error("扫码链接来源异常");
+      if (scanUrl.protocol !== "https:" || !qrHosts.has(scanUrl.hostname) || scanUrl.port || scanUrl.username || scanUrl.password) {
+        throw new Error("扫码链接来源异常");
+      }
       const image = await QRCode.toDataURL(data.url, { width: 256, margin: 2, errorCorrectionLevel: "M" });
       if (generation !== this.loginGeneration) return;
       const expiresAt = Date.now() + this.qrLifetimeMs;
@@ -200,29 +204,32 @@ export class LiveDemo extends EventEmitter {
     this.log("直播", message);
   }
 
-  async connect(input) {
+  async connect(input, mode = "account") {
     const roomId = String(input ?? "").trim();
     if (!/^[1-9]\d{0,15}$/.test(roomId) || !Number.isSafeInteger(Number(roomId))) throw new Error("请输入有效的数字直播间号（支持短号）");
-    if (!this.active) throw new Error("请先登录并校验账号");
+    if (mode !== "guest" && mode !== "account") throw new Error("无效连接方式");
+    const guest = mode === "guest";
+    if (!guest && !this.active) throw new Error("请先登录，或选择游客连接");
     this.disconnect(false);
     const generation = this.roomGeneration;
-    const session = this.active;
+    const session = guest ? null : this.active;
+    const jar = session?.jar ?? this.api.newJar();
     this.state.messages = [];
-    this.state.room = { status: "resolving", inputId: roomId, message: "正在校验账号和解析直播间", commandCount: 0, danmuCount: 0 };
+    this.state.room = { status: "resolving", mode, inputId: roomId, message: guest ? "正在准备游客会话和解析直播间" : "正在校验账号和解析直播间", commandCount: 0, danmuCount: 0 };
     this.changed();
-    const current = () => generation === this.roomGeneration && session === this.active;
+    const current = () => generation === this.roomGeneration && (guest || session === this.active);
     try {
-      await this.checkAccount();
+      const images = guest ? await this.api.guestImages(jar) : (await this.checkAccount()).images;
       if (!current()) return;
-      const room = await this.api.room(roomId, session.jar);
+      const room = await this.api.room(roomId, jar);
       if (!current()) return;
       this.state.room = { ...this.state.room, ...room, status: "token", message: "正在获取直播认证" };
       this.log("房间解析", `输入 ${roomId} → 真实房间 ${room.id}`);
-      const { token, node } = await this.api.liveToken(room.id, session.jar, session.images);
+      const { token, node } = await this.api.liveToken(room.id, jar, images);
       if (!current()) return;
       const address = `wss://${node.host}:${node.wss_port}/sub`;
-      const cookies = await session.jar.getCookieString(`https://${node.host}/`);
-      const buvid = (await session.jar.getCookies(`https://${node.host}/`)).find((cookie) => cookie.key === "buvid3")?.value;
+      const cookies = await jar.getCookieString(`https://${node.host}/`);
+      const buvid = (await jar.getCookies(`https://${node.host}/`)).find((cookie) => cookie.key === "buvid3")?.value;
       if (!current()) return;
       this.state.room.status = "connecting";
       this.state.room.node = node.host;
@@ -246,7 +253,7 @@ export class LiveDemo extends EventEmitter {
           this.state.room.status = "authenticating";
           this.state.room.message = "WSS 已建立，等待直播认证回复";
           this.changed();
-          socket.send(packet(7, { uid: Number(session.account.uid), roomid: Number(room.id), protover: 3, buvid, platform: "web", type: 2, key: token }));
+          socket.send(packet(7, { uid: guest ? 0 : Number(session.account.uid), roomid: Number(room.id), protover: 3, buvid, platform: "web", type: 2, key: token }));
         } catch { this.failRoom(generation, "发送直播认证失败"); }
       });
       socket.on("message", (bytes) => {
@@ -257,7 +264,7 @@ export class LiveDemo extends EventEmitter {
             if (decoded.operation === 8) {
               const reply = JSON.parse(decoded.body.toString("utf8"));
               if (reply.code !== 0) {
-                this.failRoom(generation, `直播认证被拒绝（代码 ${Number(reply.code) || "未知"}），请检查登录后重连`);
+                this.failRoom(generation, `直播认证被拒绝（代码 ${Number(reply.code) || "未知"}）${guest ? "，平台未接受本次游客连接" : "，请检查登录后重连"}`);
                 break;
               }
               if (this.state.room.status === "connected") continue;
@@ -276,7 +283,7 @@ export class LiveDemo extends EventEmitter {
               heartbeat();
               this.heartbeatTimer = setInterval(heartbeat, 30_000);
               this.heartbeatTimer.unref();
-              this.log("直播认证", "认证成功；接收账号与弹幕发送者分别记录");
+              this.log("直播认证", guest ? "游客认证成功；发送者 UID 或昵称可能被隐藏" : "认证成功；接收账号与弹幕发送者分别记录");
             } else if (decoded.operation === 3 && this.state.room.status === "connected") {
               this.onHeartbeat?.();
               this.state.room.lastHeartbeatAt = Date.now();
@@ -284,7 +291,7 @@ export class LiveDemo extends EventEmitter {
             } else if (decoded.operation === 5 && this.state.room.status === "connected") {
               const data = JSON.parse(decoded.body.toString("utf8"));
               ++this.state.room.commandCount;
-              const message = normalizeDanmu(data, { roomId: room.id, receiverAccountId: session.account.uid });
+              const message = normalizeDanmu(data, { roomId: room.id, receiverAccountId: session?.account.uid ?? null });
               if (message) {
                 ++this.state.room.danmuCount;
                 message.sequence = this.state.room.danmuCount;

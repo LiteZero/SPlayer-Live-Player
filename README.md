@@ -4,7 +4,7 @@
 网页提供可切换的歌词展示方式，AMLL（Apple Music-like Lyrics）是其中一种可选渲染器。
 
 首版在同一台电脑运行 SPlayer、后端与 OBS。正式应用仍在准备，已完成后端控制 SPlayer 搜索并播放首个结果的独立验证。
-长期功能包含弹幕「点歌 xxx」及未来更多指令。B 站登录与收弹幕的独立示例已实现，等待用户进行真实平台验收。
+长期功能包含弹幕「点歌 xxx」及未来更多指令。B 站独立示例已实测游客收弹幕，登录模式的身份验收待完成。
 
 ## 从这里开始
 
@@ -16,7 +16,7 @@
 完整入口见 [项目文档索引](docs/README.md)。
 点歌验证的运行方式见 [验证程序](experiments/song-request/README.md)，实测结果见 [点歌与后端控制](docs/song-requests.md)。
 B 站直播间到后端的接入依据见 [弹幕接入可行性方案](docs/bilibili-ingress.md)和 [鉴权与用户信息方案](docs/bilibili-auth.md)。
-人工验收入口见 [B 站登录与弹幕示例](experiments/bilibili-live/README.md)，默认地址为 `http://127.0.0.1:19631`，支持二维码登录、Cookie 导入、账号检查与直播间连接。
+人工验收入口见 [B 站登录与弹幕示例](experiments/bilibili-live/README.md)，支持二维码登录、Cookie 导入、账号检查和游客连接。
 
 ## 当前状态
 
@@ -25,7 +25,7 @@ B 站直播间到后端的接入依据见 [弹幕接入可行性方案](docs/bil
 - 正式歌词应用工程尚未建立；`experiments/song-request/` 为点歌验证代码，`experiments/bilibili-live/` 为独立登录及收弹幕示例。
 - `SPlayer-docs/docs/` 保留原始宿主文档；其中 `.vitepress/` 是参考站点配置。
 - AMLL 克隆位于同级目录 `../applemusic-like-lyrics/`，作为只读参考，不包含在本仓库内。
-- B 站接口资料位于同级目录 `../bilibili-api-collect/`，保持只读；登录与收弹幕示例已通过本地模拟测试，真实结果待用户验收。
+- B 站接口资料位于同级目录 `../bilibili-api-collect/`，保持只读；游客实测结论和二维码域名以 [验证记录](experiments/bilibili-live/guest-validation.json) 为准。
 
 ## 协作约定
 

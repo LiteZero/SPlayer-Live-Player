@@ -82,7 +82,7 @@ export function createDemoServer({ demo = new LiveDemo() } = {}) {
         case "/api/login/check": await demo.checkAccount(); break;
         case "/api/login/cookie": await demo.importCookie(data.cookie); break;
         case "/api/logout": demo.logout(); break;
-        case "/api/room/connect": await demo.connect(data.roomId); break;
+        case "/api/room/connect": await demo.connect(data.roomId, data.mode); break;
         case "/api/room/disconnect": demo.disconnect(); break;
         default: return json(404, { error: "接口不存在" });
       }

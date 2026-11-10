@@ -20,7 +20,7 @@ export class BilibiliApi {
 
   newJar() { return new CookieJar(); }
 
-  async request(url, jar, stage, referer = "https://www.bilibili.com/") {
+  async request(url, jar, stage, referer = "https://www.bilibili.com/", acceptedCodes = [0]) {
     // 所有 URL 均由后端固定构造，不接受浏览器提交的目标地址。
     let response;
     try {
@@ -36,7 +36,7 @@ export class BilibiliApi {
     }
     let json;
     try { json = await response.json(); } catch { throw new BiliError(stage, "响应不是 JSON"); }
-    if (json.code !== 0) throw new BiliError(stage, typeof json.code === "number" ? json.code : "响应格式异常");
+    if (!acceptedCodes.includes(json?.code)) throw new BiliError(stage, typeof json?.code === "number" ? json.code : "响应格式异常");
     return json.data;
   }
 
@@ -50,6 +50,13 @@ export class BilibiliApi {
     const data = await this.request(`${API}/x/web-interface/nav`, jar, "校验登录");
     if (!data?.isLogin || !Number.isSafeInteger(data.mid) || data.mid < 1) throw new BiliError("校验登录", -101);
     return { account: { uid: String(data.mid), name: String(data.uname ?? ""), face: data.face ?? null }, images: data.wbi_img };
+  }
+
+  async guestImages(jar) {
+    const data = await this.request(`${API}/x/web-interface/nav`, jar, "获取游客签名信息", "https://www.bilibili.com/", [0, -101]);
+    if (data?.isLogin === true) throw new Error("游客会话意外返回登录账号，已停止连接");
+    if (!data?.wbi_img?.img_url || !data?.wbi_img?.sub_url) throw new Error("游客会话缺少 WBI 签名信息");
+    return data.wbi_img;
   }
 
   async importCookie(text) {
@@ -76,7 +83,7 @@ export class BilibiliApi {
       if (typeof device?.b_3 !== "string" || !device.b_3) throw new BiliError("获取设备标识", "缺少 buvid3");
       await jar.setCookie(`buvid3=${device.b_3}; Domain=bilibili.com; Path=/; Secure`, API);
     }
-    if (!images?.img_url || !images?.sub_url) throw new Error("缺少 WBI 密钥，请重新检查登录状态");
+    if (!images?.img_url || !images?.sub_url) throw new Error("缺少 WBI 签名信息，请重新连接");
     const query = signWbi({ id: roomId, type: 0, web_location: 444.8 }, images);
     const data = await this.request(`${LIVE}/xlive/web-room/v1/index/getDanmuInfo?${query}`, jar, "获取直播认证", `https://live.bilibili.com/${roomId}`);
     if (typeof data?.token !== "string" || !data.token || !Array.isArray(data.host_list)) throw new BiliError("获取直播认证", "缺少 token 或节点");

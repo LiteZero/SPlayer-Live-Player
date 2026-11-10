@@ -41,7 +41,7 @@ function fixture(t, { codes = [0], qrLifetimeMs = 2000, pollMs = 2 } = {}) {
     let code = 0;
     switch (url.pathname) {
       case "/x/passport-login/web/qrcode/generate":
-        data = { qrcode_key: "fixture-qr-secret", url: "https://passport.bilibili.com/h5-app/passport/login/scan?qrcode_key=fixture-qr-secret" };
+        data = { qrcode_key: "fixture-qr-secret", url: "https://account.bilibili.com/h5-app/passport/login/scan?qrcode_key=fixture-qr-secret" };
         break;
       case "/x/passport-login/web/qrcode/poll":
         data = { code: codes.length > 1 ? codes.shift() : codes[0], refresh_token: "fixture-refresh-secret", url: `https://passport.biligame.com/?SESSDATA=${secret}` };
@@ -52,15 +52,13 @@ function fixture(t, { codes = [0], qrLifetimeMs = 2000, pollMs = 2 } = {}) {
         break;
       case "/x/web-interface/nav":
         if (settings.failNav) throw new Error("模拟网络断开");
-        assert.match(options.headers.Cookie, /SESSDATA=/);
-        code = settings.navCode;
+        code = /SESSDATA=/.test(options.headers.Cookie) ? settings.navCode : -101;
         data = { isLogin: code === 0, mid: 123, uname: "接收账号", wbi_img: images };
         break;
       case "/room/v1/Room/room_init": data = { room_id: 456, uid: 789, live_status: 1 }; break;
       case "/x/frontend/finger/spi": data = { b_3: "fixture-device-id" }; break;
       case "/xlive/web-room/v1/index/getDanmuInfo":
         assert.match(options.headers.Cookie, /buvid3=fixture-device-id/);
-        assert.match(options.headers.Cookie, /SESSDATA=/);
         assert.match(url.searchParams.get("w_rid"), /^[a-f0-9]{32}$/);
         if (settings.waitToken) await settings.waitToken;
         data = { token: "fixture-live-secret", host_list: [{ host: "fixture.chat.bilibili.com", wss_port: 443 }] };
@@ -149,6 +147,15 @@ test("二维码过期、取消后的迟到响应不提交登录态", async (t) =
   assert.equal(demo.state.account, null);
 });
 
+test("二维码仅接受允许的 HTTPS 登录域名，拒绝相似域名", async (t) => {
+  const { demo, api } = fixture(t);
+  api.generateQr = async () => ({ qrcode_key: "fixture", url: "https://account.bilibili.com.example.com/scan?qrcode_key=fixture" });
+  await demo.startQr();
+  assert.equal(demo.state.login.status, "error");
+  assert.match(demo.state.login.message, /来源异常/);
+  assert.equal(demo.state.login.image, undefined);
+});
+
 test("导入 Cookie 后验证 UID；无效导入不破坏已有账号", async (t) => {
   const { demo } = fixture(t);
   await demo.importCookie("Cookie: SESSDATA=encoded%2Cvalue; bili_jct=csrf");
@@ -176,7 +183,7 @@ test("暂时校验失败保留凭据；-101 清除活动会话并断开房间", 
 });
 
 test("短号到真实房间、同 UID 认证、心跳和压缩弹幕接收", async (t) => {
-  const { demo } = fixture(t);
+  const { demo, calls } = fixture(t);
   await login(demo);
   await demo.connect("1");
   const socket = demo.socket;
@@ -187,6 +194,7 @@ test("短号到真实房间、同 UID 认证、心跳和压缩弹幕接收", asy
   assert.equal(payload.uid, 123);
   assert.equal(payload.roomid, 456);
   assert.equal(payload.key, "fixture-live-secret");
+  assert.match(calls.find((call) => call.url.pathname.endsWith("getDanmuInfo")).options.headers.Cookie, /SESSDATA=/);
   assert.equal(demo.state.room.status, "authenticating");
   socket.receive(packet(8, { code: 0 }));
   assert.equal(demo.state.room.status, "connected");
@@ -202,6 +210,27 @@ test("短号到真实房间、同 UID 认证、心跳和压缩弹幕接收", asy
   socket.receive(packet(5, data, 0));
   assert.equal(demo.state.room.status, "disconnected");
   assert.equal(demo.state.messages.length, 1);
+});
+
+test("未登录可用游客连接；即使已有账号也不发送账号 Cookie", async (t) => {
+  const { demo, calls } = fixture(t);
+  await demo.connect("1", "guest");
+  assert.equal(demo.state.accountStatus, "signedOut");
+  assert.equal(demo.state.room.mode, "guest");
+  await login(demo);
+  const firstGuestCall = calls.length;
+  await demo.connect("1", "guest");
+  const socket = demo.socket;
+  await until(() => socket.sent.length > 0);
+  assert.equal(JSON.parse(decodePackets(socket.sent[0])[0].body).uid, 0);
+  assert.doesNotMatch(socket.options.headers.Cookie, /SESSDATA=|DedeUserID=/);
+  for (const call of calls.slice(firstGuestCall)) assert.doesNotMatch(call.options.headers.Cookie, /SESSDATA=|DedeUserID=/);
+  socket.receive(packet(8, { code: 0 }));
+  socket.receive(packet(5, { cmd: "DANMU_MSG", info: [[], "游客验收", [0, "观***"]] }, 0));
+  assert.equal(demo.state.account.uid, "123");
+  assert.equal(demo.state.messages[0].receiverAccountId, null);
+  assert.equal(demo.state.messages[0].senderUid, null);
+  assert.equal(demo.state.messages[0].identityStatus, "unavailable");
 });
 
 test("认证拒绝不会记为已连接，数据包异常安全停止", async (t) => {

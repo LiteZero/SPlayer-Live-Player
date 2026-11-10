@@ -40,6 +40,7 @@ function renderControls() {
   el("checkButton").disabled = !online || !hasAccount || busy.has("check");
   el("logoutButton").disabled = !online || (!hasAccount && !current?.login.image) || busy.has("logout");
   el("connectButton").disabled = !online || !hasAccount || busy.has("connect") || roomActive;
+  el("guestButton").disabled = !online || busy.has("connect") || roomActive;
   el("disconnectButton").disabled = !online || !roomActive || busy.has("disconnect");
   el("cookieButton").disabled = !online || busy.has("cookie") || busy.has("qr");
   el("cancelButton").disabled = !online || busy.has("cancel");
@@ -58,6 +59,7 @@ function render(state) {
   el("roomMessage").textContent = room.message;
   el("roomInfo").replaceChildren();
   const rows = [
+    ["连接方式", room.mode === "guest" ? "游客（未使用账号）" : room.mode === "account" ? "已登录账号" : null],
     ["真实房间号", room.id], ["房主 UID", room.ownerUid],
     ["开播状态", room.liveStatus == null ? null : ({ 0: "未开播", 1: "直播中", 2: "轮播中" }[room.liveStatus] || "未知")],
     ["接入节点", room.node], ["最近心跳", room.lastHeartbeatAt ? time(room.lastHeartbeatAt) : null],
@@ -106,7 +108,7 @@ el("logoutButton").addEventListener("click", () => action("logout", "/api/logout
 el("disconnectButton").addEventListener("click", () => action("disconnect", "/api/room/disconnect"));
 el("roomForm").addEventListener("submit", (event) => {
   event.preventDefault();
-  action("connect", "/api/room/connect", { roomId: el("roomId").value.trim() });
+  action("connect", "/api/room/connect", { roomId: el("roomId").value.trim(), mode: event.submitter?.value || (current?.account ? "account" : "guest") });
 });
 el("cookieForm").addEventListener("submit", (event) => {
   event.preventDefault();

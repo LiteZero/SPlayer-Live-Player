@@ -13,7 +13,7 @@
     <header>
       <p class="eyebrow">SPLAYER LIVE · 本地验证</p>
       <h1>B 站登录与弹幕验收</h1>
-      <p>依次确认账号登录、直播认证和弹幕身份。此示例只接收弹幕，不执行点歌。</p>
+      <p>可登录账号或直接以游客连接，分别验收直播认证和弹幕接收。此示例只接收弹幕，不执行点歌。</p>
       <span id="backend" class="badge" role="status">连接本地后端中</span>
     </header>
     <div id="error" class="error" role="alert" hidden></div>
@@ -48,13 +48,14 @@
           <label for="roomId">直播间号（支持短号）</label>
           <input id="roomId" name="roomId" inputmode="numeric" pattern="[1-9][0-9]*" maxlength="16" placeholder="输入直播间号，如 123456" required>
           <div class="actions">
-            <button id="connectButton" type="submit" disabled>连接直播间</button>
+            <button id="connectButton" type="submit" value="account" disabled>登录后连接</button>
+            <button id="guestButton" class="secondary" type="submit" value="guest" disabled>游客连接</button>
             <button id="disconnectButton" class="secondary" type="button" disabled>断开连接</button>
           </div>
         </form>
         <p id="roomMessage" class="muted" aria-live="polite"></p>
         <dl id="roomInfo"></dl>
-        <p class="note">认证成功后，使用 B 站网页或客户端向该直播间发送“歌词验收”。可用另一个账号发送，核对发送者 UID 与接收账号的区别。</p>
+        <p class="note">游客连接无需登录，发送者 UID 或昵称可能不可用。认证成功后，可使用 B 站网页或客户端向该直播间发送“歌词验收”。</p>
       </section>
     </div>
     <section aria-labelledby="messagesTitle">
