@@ -1,0 +1,21 @@
+{
+  "dateLocal": "2026-11-11",
+  "timezone": "Asia/Shanghai",
+  "evidenceSource": "用户人工确认及验收截图",
+  "demoRevision": "badafe3",
+  "mode": "account",
+  "loginValidated": true,
+  "credentialEntryMethodObserved": false,
+  "roomId": "27519423",
+  "roomStatus": "connected",
+  "heartbeatDisplayed": true,
+  "heartbeatLocalTime": "05:50:28",
+  "observedDanmuCount": 1,
+  "danmu": {
+    "receivedLocalTime": "05:50:43",
+    "textPresent": true,
+    "senderUidPresent": true,
+    "senderNamePresent": true,
+    "identityStatus": "identified"
+  }
+}

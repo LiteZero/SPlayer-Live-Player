@@ -4,7 +4,7 @@
 网页提供可切换的歌词展示方式，AMLL（Apple Music-like Lyrics）是其中一种可选渲染器。
 
 首版在同一台电脑运行 SPlayer、后端与 OBS。正式应用仍在准备，已完成后端控制 SPlayer 搜索并播放首个结果的独立验证。
-长期功能包含弹幕「点歌 xxx」及未来更多指令。B 站独立示例已实测游客收弹幕，登录模式的身份验收待完成。
+长期功能包含弹幕「点歌 xxx」及未来更多指令。B 站独立示例已验证游客收弹幕，以及登录后接收带发送者 UID 和昵称的弹幕。两段链路已各自验证，尚未串成自动点歌闭环。
 
 ## 从这里开始
 
@@ -25,7 +25,7 @@ B 站直播间到后端的接入依据见 [弹幕接入可行性方案](docs/bil
 - 正式歌词应用工程尚未建立；`experiments/song-request/` 为点歌验证代码，`experiments/bilibili-live/` 为独立登录及收弹幕示例。
 - `SPlayer-docs/docs/` 保留原始宿主文档；其中 `.vitepress/` 是参考站点配置。
 - AMLL 克隆位于同级目录 `../applemusic-like-lyrics/`，作为只读参考，不包含在本仓库内。
-- B 站接口资料位于同级目录 `../bilibili-api-collect/`，保持只读；游客实测结论和二维码域名以 [验证记录](experiments/bilibili-live/guest-validation.json) 为准。
+- B 站接口资料位于同级目录 `../bilibili-api-collect/`，保持只读。接入选型以 [登录验收记录](experiments/bilibili-live/account-validation.json) 和 [游客实测记录](experiments/bilibili-live/guest-validation.json) 为依据：需要用户身份时优先登录，游客用于文本接收和诊断。
 
 ## 协作约定
 
