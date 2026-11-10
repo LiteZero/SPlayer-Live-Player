@@ -10,6 +10,7 @@
 | [架构方案](architecture.md) | 采集、传输、快照恢复与同步时钟 |
 | [渲染器接口草案](renderers.md) | 可替换展示方式、按需加载、切换与资源释放 |
 | [点歌与后端控制](song-requests.md) | 长期弹幕指令需求、本次后端控制范围与真实宿主结果 |
+| [B 站鉴权与用户信息](bilibili-auth.md) | 优先方案：二维码登录、Cookie 导入、会话生命周期及发送者身份边界；未执行登录 |
 | [B 站弹幕接入方案](bilibili-ingress.md) | 直播间到后端的资料可行性分析，仅提方案，未连接验证 |
 | [AMLL 接入分析](amll-integration.md) | 本地源码基线、歌词映射、渲染 API 和验证点 |
 | [参考资料分析](reference-notes.md) | SPlayer 能力、接口约束和资料缺口 |
@@ -50,5 +51,6 @@
 
 用户提供的 `../bilibili-api-collect/` 为独立参考仓库，本轮只读。
 重点阅读 [直播间信息流](../../bilibili-api-collect/docs/live/message_stream.md)、
-[房间信息](../../bilibili-api-collect/docs/live/info.md)、[WBI 签名](../../bilibili-api-collect/docs/misc/sign/wbi.md)。
+[房间信息](../../bilibili-api-collect/docs/live/info.md)、[WBI 签名](../../bilibili-api-collect/docs/misc/sign/wbi.md)、
+[二维码登录](../../bilibili-api-collect/docs/login/login_action/QR.md)、[登录信息](../../bilibili-api-collect/docs/login/login_info.md)及 [Cookie 刷新](../../bilibili-api-collect/docs/login/cookie_refresh.md)。
 基线提交与方案限制见 [弹幕接入方案](bilibili-ingress.md)，项目地址统一列在根目录 README 致谢中。
