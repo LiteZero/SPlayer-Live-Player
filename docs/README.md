@@ -1,6 +1,6 @@
 # 项目文档索引
 
-整理日期：2026-11-11。当前阶段：已明确直播歌词产品方向，准备技术验证。
+整理日期：2026-11-11。当前阶段：已明确直播歌词方向，后端到 SPlayer 的点歌专项已完成真实验证。
 
 ## 本项目文档
 
@@ -9,6 +9,7 @@
 | [需求与验收](requirements.md) | 插件、本地后端、OBS 歌词网页与多种展示方式 |
 | [架构方案](architecture.md) | 采集、传输、快照恢复与同步时钟 |
 | [渲染器接口草案](renderers.md) | 可替换展示方式、按需加载、切换与资源释放 |
+| [点歌与后端控制](song-requests.md) | 长期弹幕指令需求、本次后端控制范围与真实宿主结果 |
 | [AMLL 接入分析](amll-integration.md) | 本地源码基线、歌词映射、渲染 API 和验证点 |
 | [参考资料分析](reference-notes.md) | SPlayer 能力、接口约束和资料缺口 |
 | [开发计划](roadmap.md) | 阶段交付物、依赖与验收条件 |
@@ -29,6 +30,8 @@
 | 可选外部接口 | [HTTP](../SPlayer-docs/docs/api.md)、[WebSocket](../SPlayer-docs/docs/socket.md)、[MCP](../SPlayer-docs/docs/mcp.md) |
 
 英文参考位于 `SPlayer-docs/docs/en/`。
+
+点歌实验程序见 [运行说明](../experiments/song-request/README.md)。
 
 ## AMLL 本地参考
 

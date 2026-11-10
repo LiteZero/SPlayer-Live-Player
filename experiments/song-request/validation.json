@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-11",
+  "environment": {
+    "app": "SPlayer-Next",
+    "version": "1.2.0",
+    "apiLevel": 5,
+    "node": "v24.21.0"
+  },
+  "scope": "local backend -> imported SPlayer plugin -> searchOnline -> playTrack -> getNowPlaying",
+  "request": {
+    "type": "requestSong",
+    "query": "晴天",
+    "platform": "netease"
+  },
+  "commandId": "20ce133b-ff94-4be8-868e-b34e4293d604",
+  "status": "playing",
+  "result": {
+    "track": {
+      "id": "2668397359",
+      "source": "netease",
+      "title": "晴天 (原唱 周杰伦)"
+    },
+    "requestAccepted": true,
+    "error": null,
+    "phase": "confirm"
+  },
+  "elapsedMs": 3260,
+  "confirmation": "Target track id/source matched and host state was playing; no audio capture was performed."
+}

@@ -3,7 +3,8 @@
 通过 SPlayer-Next 插件采集歌词与播放状态，经本地后端传递给网页，作为 OBS 等直播软件的浏览器源叠加到直播画面中。
 网页提供可切换的歌词展示方式，AMLL（Apple Music-like Lyrics）是其中一种可选渲染器。
 
-首版在同一台电脑运行 SPlayer、后端与 OBS。当前继续整理需求和技术方案，尚未编写应用代码。
+首版在同一台电脑运行 SPlayer、后端与 OBS。当前整理需求和技术方案，已完成后端控制 SPlayer 搜索并播放首个结果的独立验证。
+长期功能包含弹幕「点歌 xxx」及未来更多指令，弹幕接入暂不设计。
 
 ## 从这里开始
 
@@ -13,12 +14,13 @@
 4. 参考 [AMLL 接入分析](docs/amll-integration.md) 和 [开发计划](docs/roadmap.md) 进入后续验证。
 
 完整入口见 [项目文档索引](docs/README.md)。
+点歌验证的运行方式见 [验证程序](experiments/song-request/README.md)，实测结果见 [点歌与后端控制](docs/song-requests.md)。
 
 ## 当前状态
 
 - Git 仓库已建立，默认分支为 `main`。
 - 产品方向、OBS 浏览器源、同机部署及多种展示方式已确认。
-- 当前只准备文档；应用源码、依赖、启动和构建流程尚未建立。
+- 正式歌词应用工程尚未建立；`experiments/song-request/` 为不依赖第三方包的点歌验证代码。
 - `SPlayer-docs/docs/` 保留原始宿主文档；其中 `.vitepress/` 是参考站点配置。
 - AMLL 克隆位于同级目录 `../applemusic-like-lyrics/`，作为只读参考，不包含在本仓库内。
 
