@@ -4,6 +4,9 @@
 
 Powered by ChatGPT.
 
+<img width="880" height="180" alt="now-playing-preview" src="https://github.com/user-attachments/assets/8c889cf5-50c0-4f14-8c5d-53f22c407dbe" />
+
+
 ## 这是什么？
 
 如上述所言，这是一个基于SPlayer-Next所提供的插件API，向主播们提供的一个点歌解决方案。
