@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SPlayer Live Player · 歌词输出</title>
+  <link rel="stylesheet" href="/obs.css">
+  <link rel="stylesheet" id="custom-style" href="/obs-custom.css">
+  <script type="module" src="/obs.mjs"></script>
+</head>
+<body>
+  <main id="output">
+    <div class="now-playing-slot"></div>
+    <div id="lyrics"></div>
+  </main>
+  <template id="now-playing-template">
+    <section class="now-playing" aria-label="正在播放">
+      <span class="now-playing-next" aria-hidden="true">N E X T</span>
+      <div class="now-playing-disc" aria-hidden="true"><span>♪</span></div>
+      <div class="now-playing-details">
+        <div class="now-playing-title" dir="auto"></div>
+        <div class="now-playing-artist" dir="auto" hidden></div>
+      </div>
+    </section>
+  </template>
+</body>
+</html>

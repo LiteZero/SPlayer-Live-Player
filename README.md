@@ -1,40 +1,26 @@
 # SPlayer Live Player
 
-通过 SPlayer-Next 插件采集歌词与播放状态，经本地后端传递给网页，作为 OBS 等直播软件的浏览器源叠加到直播画面中。
-网页提供可切换的歌词展示方式，AMLL（Apple Music-like Lyrics）是其中一种可选渲染器。
+基于[SPlayer-Next](https://github.com/SPlayer-Dev/SPlayer-Next)的插件功能，为您提供的 **⌈下一个⌋** B站直播点歌服务解决方案。
 
-首版在同一台电脑运行 SPlayer、后端与 OBS。正式应用仍在准备，已完成后端控制 SPlayer 搜索并播放首个结果的独立验证。
-长期功能包含弹幕「点歌 xxx」及未来更多指令。B 站独立示例已验证游客收弹幕，以及登录后接收带发送者 UID 和昵称的弹幕。两段链路已各自验证，尚未串成自动点歌闭环。
+Powered by ChatGPT.
 
-## 从这里开始
+## 这是什么？
 
-开始正式开发或换对话接手时，先读根目录 [开发交接文档](DEVELOPMENT.md)：各端对接优先，性能设计和测量其次。
+如上述所言，这是一个基于SPlayer-Next所提供的插件API，向主播们提供的一个点歌解决方案。
 
-1. 阅读 [需求与验收](docs/requirements.md)，了解已确认需求与待定细节。
-2. 阅读 [架构方案](docs/architecture.md)，了解插件、后端、同步时钟与可替换渲染器的职责。
-3. 阅读 [渲染器接口草案](docs/renderers.md)，了解性能与扩展边界。
-4. 参考 [AMLL 接入分析](docs/amll-integration.md) 和 [开发计划](docs/roadmap.md) 进入后续验证。
+目前市面上的其他产品都存在着如下问题：
 
-完整入口见 [项目文档索引](docs/README.md)。
-点歌验证的运行方式见 [验证程序](experiments/song-request/README.md)，实测结果见 [点歌与后端控制](docs/song-requests.md)。
-B 站直播间到后端的接入依据见 [弹幕接入可行性方案](docs/bilibili-ingress.md)和 [鉴权与用户信息方案](docs/bilibili-auth.md)。
-人工验收入口见 [B 站登录与弹幕示例](experiments/bilibili-live/README.md)，支持二维码登录、Cookie 导入、账号检查和游客连接。
+- 点歌机使用体验不像真正的音乐播放器，通常需要混用点歌机与播放器。
 
-## 当前状态
+- 为了保证观众的音乐体验，通常需要多个音乐软件反复切换。
 
-- Git 仓库已建立，默认分支为 `main`。
-- 产品方向、OBS 浏览器源、同机部署及多种展示方式已确认。
-- 正式歌词应用工程尚未建立；`experiments/song-request/` 为点歌验证代码，`experiments/bilibili-live/` 为独立登录及收弹幕示例。
-- `SPlayer-docs/docs/` 保留原始宿主文档；其中 `.vitepress/` 是参考站点配置。
-- AMLL 克隆位于同级目录 `../applemusic-like-lyrics/`，作为只读参考，不包含在本仓库内。
-- B 站接口资料位于同级目录 `../bilibili-api-collect/`，保持只读。接入选型以 [登录验收记录](experiments/bilibili-live/account-validation.json) 和 [游客实测记录](experiments/bilibili-live/guest-validation.json) 为依据：需要用户身份时优先登录，游客用于文本接收和诊断。
+- OBS显示的点歌插件不够美观，可定制性不高。
 
-## 协作约定
+SPlayer Live Player正是为了解决这些问题所制作的，基于SPlayer Next已实现的在线播放、向外开放的API接口，实现了更贴合平常使用体验的中转接入平台。
 
-- 开发交接入口放在根目录，专题说明放在 `docs/`。说明使用中文，接口名称保持原名。
-- 区分已确认需求、建议方案和待验证行为，修改需求时同步维护计划与决策记录。
-- 使用 Conventional Commits：`<类型>: <中文摘要>`。
-- 后续代码格式、检查和测试命令在工程建立后补充。
+## 当前状态？
+
+此项目当前还处于早期开发状态，当前还不提供使用。
 
 ## 致谢
 

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SPlayer Live Player · 歌词设置</title>
+  <link rel="stylesheet" href="/settings.css">
+  <script type="module" src="/settings.mjs"></script>
+  <script type="module" src="/requests.mjs"></script>
+</head>
+<body>
+  <main>
+    <header><h1>SPlayer Live Player</h1><p>将 SPlayer 的歌词叠加到 OBS 直播画面。</p></header>
+    <section>
+      <h2>连接状态</h2>
+      <dl>
+        <dt>本地服务</dt><dd id="backend" role="status">正在连接…</dd>
+        <dt>SPlayer</dt><dd id="host">—</dd>
+        <dt>当前曲目</dt><dd id="track">—</dd>
+        <dt>采集统计</dt><dd id="metrics">—</dd>
+      </dl>
+      <p>启用采集插件后，在 SPlayer 播放一首带歌词的歌。</p>
+    </section>
+    <section id="song-requests">
+      <h2>B 站观众点歌</h2>
+      <p>观众发送「点歌 歌名 / 歌手」，后端按顺序搜索第一项并安排为 SPlayer 下一首。当前歌曲继续播放。</p>
+      <dl>
+        <dt>接收账号</dt><dd id="bili-account">未登录</dd>
+        <dt>直播间</dt><dd id="bili-room">尚未连接</dd>
+        <dt>点歌插件</dt><dd id="request-executor">等待连接</dd>
+      </dl>
+      <div class="request-actions">
+        <button type="button" data-bili="login/qr">二维码登录</button>
+        <button type="button" data-bili="login/cancel">取消扫码</button>
+        <button type="button" data-bili="login/check">检查账号</button>
+        <button type="button" data-bili="logout">退出账号</button>
+      </div>
+      <p id="bili-login" role="status"></p>
+      <p id="bili-connection-detail"></p>
+      <img id="bili-qr" width="224" height="224" alt="使用哔哩哔哩手机客户端扫码登录" hidden>
+      <details>
+        <summary>使用 Cookie 登录</summary>
+        <form id="cookie-form" class="request-form">
+          <label>Cookie <input id="bili-cookie" type="password" autocomplete="off" maxlength="16000" required></label>
+          <button type="submit">校验并登录</button>
+        </form>
+      </details>
+      <p>登录凭据仅保存在本地服务内存中，退出服务后清除。</p>
+      <form id="room-form" class="request-form">
+        <label>房间号 <input id="room-id" inputmode="numeric" pattern="[1-9][0-9]{0,15}" placeholder="支持直播间短号" required></label>
+        <label>连接方式 <select id="room-mode"><option value="account">已登录账号</option><option value="guest">游客（仅查看弹幕）</option></select></label>
+        <button type="submit">连接直播间</button>
+        <button type="button" data-bili="room/disconnect">断开</button>
+      </form>
+      <form id="request-config" class="request-form">
+        <label><input id="requests-enabled" type="checkbox">启用点歌处理</label>
+        <label>音源 <select id="request-platform"><option value="netease">网易云</option><option value="qqmusic">QQ 音乐</option><option value="kugou">酷狗</option></select></label>
+        <label><input id="allow-anonymous" type="checkbox">允许身份缺失或受限的观众点歌</label>
+        <button type="submit">应用点歌设置</button>
+      </form>
+      <p id="request-config-status">默认关闭；启用后开始处理点歌。游客连接不会触发点歌。</p>
+      <p id="request-action-status" role="status" aria-live="polite"></p>
+      <details><summary>直播连接诊断</summary><ul id="bili-connection-logs" class="request-list"></ul></details>
+      <details><summary>最近弹幕与接收结果</summary>
+        <ul id="bili-messages" class="request-list"></ul>
+        <h3>点歌接收结果</h3><ul id="request-receipts" class="request-list"></ul>
+      </details>
+    </section>
+    <section>
+      <h2>观众点歌队列</h2>
+      <p>后端按收到顺序排队，每次只安排一首到 SPlayer“下一首”。确认这首开始播放后，再安排后续点歌。</p>
+      <p id="request-playing" role="status"></p>
+      <details><summary>SPlayer 当前播放列表</summary>
+      <p id="native-queue-status" role="status">等待插件同步原生播放队列…</p>
+      <p id="native-mode-warning"></p>
+      <ol id="native-queue" class="request-list"></ol>
+      <p>显示当前曲目及其后的最多 49 首。排序、移除、播放与切歌请在 SPlayer 中操作；暂停或空闲时，添加点歌不会自动开始播放。</p>
+      <p>已在列表中的歌曲会显示“已在播放列表”，不重复添加，也不改变其播放位置。</p>
+      </details>
+      <h3>待处理点歌 <span id="pending-count"></span></h3>
+      <p id="request-blocked" role="status"></p>
+      <button id="resume-requests" type="button" hidden>已核对播放列表，继续处理</button>
+      <ul id="pending-requests" class="request-list"></ul>
+      <button id="release-scheduled" type="button" hidden>解除待播等待，继续后续点歌</button>
+      <p id="scheduled-hint" hidden>如果已手动跳过、移除待播歌曲，可解除等待。此操作不会从 SPlayer 删除歌曲。</p>
+      <form id="manual-request" class="request-form">
+        <label>手动点歌 <input id="manual-query" maxlength="200" placeholder="歌名 / 歌手" required></label>
+        <button type="submit">加入点歌队列</button>
+      </form>
+      <details><summary>最近点歌处理记录</summary><ul id="request-history" class="request-list"></ul></details>
+    </section>
+    <section>
+      <h2>OBS 浏览器源</h2>
+      <label>展示方式 <select id="renderer"></select></label>
+      <div class="preview"><iframe title="歌词预览" id="preview"></iframe></div>
+      <label for="url">输出地址</label>
+      <div class="url">
+        <input id="url" readonly>
+        <button id="copy" type="button">复制地址</button>
+        <a id="open" target="_blank" rel="noopener">打开输出</a>
+      </div>
+      <p>将地址粘贴到 OBS 浏览器源。可先用 1200 × 180 预览；音频继续通过 OBS 单独采集。</p>
+      <form id="layout-form">
+        <fieldset id="layout-controls" disabled>
+          <legend>元素布局</legend>
+          <p id="layout-hint">修改后可立即在预览查看。大小以默认值为 100%，位移按画布宽高计算，正值向右、向下。</p>
+          <table class="layout-table" aria-describedby="layout-hint">
+            <thead><tr><th scope="col">元素</th><th scope="col">大小 %</th><th scope="col">横向 %</th><th scope="col">纵向 %</th></tr></thead>
+            <tbody id="layout-rows"></tbody>
+          </table>
+          <div class="style-actions">
+            <button type="submit" id="save-layout" disabled>保存布局</button>
+            <button type="button" id="reset-layout">恢复默认</button>
+            <span id="layout-status" role="status"></span>
+          </div>
+        </fieldset>
+      </form>
+      <form id="style-form">
+        <label for="custom-css">自定义 CSS</label>
+        <p id="css-hint">样式同时应用于上方预览和 OBS。<code>.lyric-original</code>、<code>.lyric-roman</code>、<code>.lyric-translation</code> 分别选择原文、音译和翻译。</p>
+        <textarea id="custom-css" rows="6" spellcheck="false" aria-describedby="css-hint"
+          placeholder=".lyric-original { color: #ffe0a8; }" disabled></textarea>
+        <div class="style-actions">
+          <button type="submit" id="save-style" disabled>保存并应用</button>
+          <button type="button" id="clear-style" disabled>清空样式</button>
+          <span id="style-status" role="status"></span>
+        </div>
+      </form>
+    </section>
+    <section>
+      <h2>事件诊断</h2>
+      <p><a href="/api/status" download="splayer-lyrics-diagnostics.json">保存诊断 JSON</a> · 记录最近的曲目、歌词和播放事件，不含歌词正文。</p>
+      <pre id="trace" aria-label="事件记录">暂无事件</pre>
+    </section>
+  </main>
+</body>
+</html>

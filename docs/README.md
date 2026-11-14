@@ -8,9 +8,12 @@
 | 文档 | 用途 |
 | --- | --- |
 | [需求与验收](requirements.md) | 插件、本地后端、OBS 歌词网页与多种展示方式 |
+| [歌词首轮对接](lyrics-mvp.md) | 安装、协议、模拟验证及真实 SPlayer／OBS 联调清单 |
 | [架构方案](architecture.md) | 采集、传输、快照恢复与同步时钟 |
 | [渲染器接口草案](renderers.md) | 可替换展示方式、按需加载、切换与资源释放 |
 | [点歌与后端控制](song-requests.md) | 长期弹幕指令需求、本次后端控制范围与真实宿主结果 |
+| [点歌队列](native-song-queue.md) | 正式 B 站接入、插件 0.4.0、后端 FIFO 与逐首下一首安排、故障边界与验收 |
+| [交付说明](releases.md) | 应用 v0.2.0 Windows x64 免安装包、运行环境、构建及实际 ZIP 验证 |
 | [B 站鉴权与用户信息](bilibili-auth.md) | 优先方案：二维码登录、Cookie 导入、会话生命周期及发送者身份边界；未执行登录 |
 | [B 站弹幕接入方案](bilibili-ingress.md) | 已验证的账号与游客接入路径、身份边界及后续点歌对接 |
 | [B 站登录与弹幕示例](../experiments/bilibili-live/README.md) | 网页扫码、账号检查、房间输入、收弹幕及人工验收步骤 |
